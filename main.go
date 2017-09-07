@@ -1,18 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"os"
 
-	"github.com/zenazn/goji"
-	"github.com/zenazn/goji/web"
+	log "github.com/Sirupsen/logrus"
+	"gitlab.fbk.eu/essence/essence-auth/api"
 )
 
-func hello(c web.C, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %s!", c.URLParams["name"])
-}
-
 func main() {
-	goji.Get("/hello/:name", hello)
-	goji.Serve()
+
+	log.SetLevel(log.DebugLevel)
+
+	err := api.StartDefault()
+	if err != nil {
+		log.Fatalf("Failed to setup: %s", err.Error())
+		os.Exit(1)
+	}
 }

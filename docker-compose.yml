@@ -1,0 +1,18 @@
+version: "2"
+services:
+  mongoadmin:
+    image: adicom/admin-mongo
+    # environment:
+    restart: always
+    # volumes:
+    links:
+      - mongo
+    ports:
+        - 8082:1234
+  mongo:
+    image: mongo:3
+    volumes:
+      - ./data/mongodb:/data/db
+    command: --smallfiles --setParameter failIndexKeyTooLong=false
+    ports:
+        - 27017:27017
