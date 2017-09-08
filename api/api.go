@@ -1,15 +1,16 @@
 package api
 
 import (
-	"net"
+	"context"
+	"net/http"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"gitlab.fbk.eu/essence/essence-auth/db"
 )
 
-var listener net.Listener
+var server *http.Server
 
 const (
 	defaultDatabase = "essence"
@@ -31,11 +32,14 @@ func SetupDefault() error {
 
 //Setup init api
 func Setup(state *db.State) error {
+
 	log.Debugf("Connecting to DB %s@%+v", state.Database, state.Addrs)
+
 	err := db.Connect(state)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -56,18 +60,32 @@ func Start(address string, db *db.State) error {
 	r := gin.Default()
 
 	r.POST("/register", UserRegister)
+	r.POST("/login", UserLogin)
 
-	err = manners.ListenAndServe(address, r)
-	if err != nil {
-		return err
+	auth := r.Group("/", AuthHandler)
+	auth.POST("/authorized", IsAuthorized)
+
+	server = &http.Server{
+		Addr:    address,
+		Handler: r,
 	}
 
-	log.Debug("Listening on %s", address)
+	go func() {
+		err = server.ListenAndServe()
+		if err != nil {
+			log.Warnf("Failed to start server %s", err.Error())
+			return
+		}
+	}()
+
+	log.Debugf("Listening on http://%s", address)
 	return nil
 }
 
 //Stop the server
 func Stop() error {
-	manners.Close()
-	return nil
+	db.Disconnect()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return server.Shutdown(ctx)
 }

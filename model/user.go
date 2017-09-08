@@ -1,9 +1,8 @@
 package model
 
 import (
-	"time"
-
 	"github.com/satori/go.uuid"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // ServiceEnabled list enabled services
@@ -60,14 +59,18 @@ type GeneralPreferences struct {
 
 // User profile informations
 type User struct {
+	ObjectID       bson.ObjectId  `json:"_id,omitempty"`
 	ID             string         `json:"id"`
-	UserID         string         `json:"userId"`
-	Username       string         `json:"username"`
+	Enabled        bool           `json:"enabled"`
+	UserID         string         `json:"userId" binding:"required,uuid4"`
+	Username       string         `json:"username" binding:"required,min=3,max=64"`
+	Password       string         `json:"password" binding:"required,min=3"`
+	Email          string         `json:"email" binding:"required,min=4,email"`
+	UserType       string         `json:"userType" binding:"required"`
+	Roles          []Role         `json:"roles" binding:"required"`
 	FirstName      string         `json:"firstName"`
 	LastName       string         `json:"lastName"`
-	UserType       string         `json:"userType"`
-	DateOfBirth    time.Time      `json:"dateOfBirth"`
-	Email          string         `json:"email"`
+	DateOfBirth    string         `json:"dateOfBirth"`
 	Service        ServiceEnabled `json:"service"`
 	Lang           Lang           `json:"lang"`
 	SessionToken   string         `json:"sessionToken"`
@@ -85,6 +88,7 @@ func NewUser() User {
 	return User{
 		AssignedDoctor: make([]User, 0),
 		AssignedUsers:  make([]User, 0),
+		Roles:          make([]Role, 0),
 		ID:             uuid.NewV4().String(),
 		Lang:           LangEn,
 		Service: ServiceEnabled{
