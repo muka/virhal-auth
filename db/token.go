@@ -13,9 +13,9 @@ func TokenColl() *mgo.Collection {
 }
 
 //TokenCreate create a token
-func TokenCreate() (model.Token, *errors.APIError) {
+func TokenCreate(user *model.User) (model.Token, *errors.APIError) {
 
-	t := model.NewToken()
+	t := model.NewToken(user)
 
 	err := t.GenerateJWTToken()
 	if err != nil {

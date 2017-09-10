@@ -51,9 +51,10 @@ func (t *Token) GenerateJWTToken() error {
 }
 
 //NewToken create a new token
-func NewToken() Token {
+func NewToken(user *User) Token {
 	return Token{
 		Expires: time.Now().Add(defaultExpires),
 		Created: time.Now(),
+		UserID:  user.UserID,
 	}
 }

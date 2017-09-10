@@ -16,8 +16,8 @@ var server *http.Server
 
 const appPrefix = "auth"
 
-//Setup init api
-func Setup() error {
+//LoadConfiguration load configurations
+func LoadConfiguration() error {
 
 	viper.SetDefault("log_level", "info")
 	viper.SetDefault("mongodb", []string{"127.0.0.1"})
@@ -35,6 +35,11 @@ func Setup() error {
 		log.Errorf("Failed to read configuration file: %s", err.Error())
 		return err
 	}
+	return nil
+}
+
+//Setup init api
+func Setup() error {
 
 	log.Warnf("cfg %+v", viper.AllSettings())
 
@@ -59,7 +64,7 @@ func Setup() error {
 	log.SetLevel(logLevel)
 
 	log.Debug("Starting setup")
-	err = db.Connect()
+	err := db.Connect()
 	if err != nil {
 		return err
 	}

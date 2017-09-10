@@ -2,8 +2,8 @@ package model
 
 // RequestLogin contains login request
 type RequestLogin struct {
-	Username string `json:"userName" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required,min=3,max=64"`
+	Password string `json:"password" binding:"required,min=3"`
 }
 
 // RequestRegister contains login request

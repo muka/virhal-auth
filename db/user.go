@@ -93,7 +93,7 @@ func UserLogin(username, password string) (model.User, *errors.APIError) {
 		return user, errors.InternalServerError()
 	}
 
-	token, terr := TokenCreate()
+	token, terr := TokenCreate(&user)
 	if terr != nil {
 		return user, terr
 	}

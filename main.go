@@ -10,7 +10,13 @@ import (
 
 func main() {
 
-	err := api.Start()
+	err := api.LoadConfiguration()
+	if err != nil {
+		log.Fatalf("Failed to configure: %s", err.Error())
+		os.Exit(1)
+	}
+
+	err = api.Start()
 	if err != nil {
 		log.Fatalf("Failed to start: %s", err.Error())
 		os.Exit(1)

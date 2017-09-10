@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"os"
 	"testing"
@@ -9,8 +10,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/go-resty/resty"
+	"github.com/spf13/viper"
 	"gitlab.fbk.eu/essence/essence-auth/api"
-	"gitlab.fbk.eu/essence/essence-auth/db"
 	"gitlab.fbk.eu/essence/essence-auth/model"
 )
 
@@ -20,11 +21,16 @@ func TestMain(m *testing.M) {
 
 	log.SetLevel(log.DebugLevel)
 
+	err := api.LoadConfiguration()
+	if err != nil {
+		panic(err)
+	}
+
+	viper.Set("listen", ":8009")
+	viper.Set("database", "auth_test")
+
 	go func() {
-		err := api.Start(testPort, &db.State{
-			Addrs:    []string{"mongo"},
-			Database: "essence_test",
-		})
+		err := api.Start()
 		if err != nil {
 			panic(err)
 		}
@@ -43,6 +49,10 @@ func TestMain(m *testing.M) {
 func TestUserRegister(t *testing.T) {
 
 	u := model.NewUser()
+	u.Username = "test" + strconv.Itoa(int(time.Now().UnixNano()))
+	u.Password = "secret"
+	u.Email = u.Username + "@test.local"
+
 	uri := fmt.Sprintf("http://localhost%s/%s", testPort, "register")
 	resp, err := resty.R().
 		SetHeader("Content-Type", "application/json").
@@ -55,5 +65,4 @@ func TestUserRegister(t *testing.T) {
 	}
 
 	log.Printf("%+v", resp)
-
 }

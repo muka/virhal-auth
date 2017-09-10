@@ -59,13 +59,14 @@ type GeneralPreferences struct {
 
 // User profile informations
 type User struct {
-	ObjectID       bson.ObjectId  `json:"_id,omitempty"`
-	ID             string         `json:"id"`
-	Enabled        bool           `json:"enabled"`
+	ObjectID bson.ObjectId `json:"-" bson:"_id"`
+	ID       string        `json:"id"`
+	Enabled  bool          `json:"enabled"`
+	Username string        `json:"username" binding:"required,min=3,max=64"`
+	Password string        `json:"-"`
+	Email    string        `json:"email" binding:"required,min=4,email"`
+
 	UserID         string         `json:"userId" binding:"required,uuid4"`
-	Username       string         `json:"username" binding:"required,min=3,max=64"`
-	Password       string         `json:"password" binding:"required,min=3"`
-	Email          string         `json:"email" binding:"required,min=4,email"`
 	UserType       string         `json:"userType" binding:"required"`
 	Roles          []Role         `json:"roles" binding:"required"`
 	FirstName      string         `json:"firstName"`
@@ -90,6 +91,7 @@ func NewUser() User {
 		AssignedUsers:  make([]User, 0),
 		Roles:          make([]Role, 0),
 		ID:             uuid.NewV4().String(),
+		ObjectID:       bson.NewObjectId(),
 		Lang:           LangEn,
 		Service: ServiceEnabled{
 			Atlante:   true,
