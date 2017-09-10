@@ -10,12 +10,7 @@ import (
 
 func main() {
 
-	// remove me
-	os.Setenv("JWT_SECRET", "secret")
-
-	log.SetLevel(log.DebugLevel)
-
-	err := api.StartDefault()
+	err := api.Start()
 	if err != nil {
 		log.Fatalf("Failed to start: %s", err.Error())
 		os.Exit(1)

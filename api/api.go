@@ -7,35 +7,64 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"gitlab.fbk.eu/essence/essence-auth/acl"
 	"gitlab.fbk.eu/essence/essence-auth/db"
 )
 
 var server *http.Server
 
-const (
-	defaultDatabase = "essence"
-	defaultDbAddr   = "mongo"
-	defaultPort     = ":8000"
-)
-
-func dbDefaults() *db.State {
-	return &db.State{
-		Addrs:    []string{defaultDbAddr},
-		Database: defaultDatabase,
-	}
-}
-
-//SetupDefault init api
-func SetupDefault() error {
-	return Setup(dbDefaults())
-}
+const appPrefix = "auth"
 
 //Setup init api
-func Setup(state *db.State) error {
+func Setup() error {
 
-	log.Debugf("Connecting to DB %s@%+v", state.Database, state.Addrs)
+	viper.SetDefault("log_level", "info")
+	viper.SetDefault("mongodb", []string{"127.0.0.1"})
+	viper.SetDefault("database", "auth_api")
+	viper.SetDefault("listen", ":8080")
+	viper.SetDefault("acl_model", "./acl_model.conf")
 
-	err := db.Connect(state)
+	viper.SetConfigName("config")
+	viper.AddConfigPath("./")
+	viper.SetEnvPrefix(appPrefix)
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {
+		log.Errorf("Failed to read configuration file: %s", err.Error())
+		return err
+	}
+
+	log.Warnf("cfg %+v", viper.AllSettings())
+
+	logLevel := log.InfoLevel
+	switch viper.GetString("log_level") {
+	case "debug":
+		logLevel = log.DebugLevel
+		break
+	case "warn":
+		logLevel = log.WarnLevel
+		break
+	case "error":
+		logLevel = log.ErrorLevel
+		break
+	case "fatal":
+		logLevel = log.FatalLevel
+		break
+	case "panic":
+		logLevel = log.PanicLevel
+		break
+	}
+	log.SetLevel(logLevel)
+
+	log.Debug("Starting setup")
+	err = db.Connect()
+	if err != nil {
+		return err
+	}
+
+	err = acl.Setup()
 	if err != nil {
 		return err
 	}
@@ -43,15 +72,10 @@ func Setup(state *db.State) error {
 	return nil
 }
 
-//StartDefault the server with default config
-func StartDefault() error {
-	return Start(defaultPort, dbDefaults())
-}
-
 //Start the server
-func Start(address string, db *db.State) error {
+func Start() error {
 
-	err := Setup(db)
+	err := Setup()
 	if err != nil {
 		return err
 	}
@@ -65,8 +89,9 @@ func Start(address string, db *db.State) error {
 	auth := r.Group("/", AuthHandler)
 	auth.POST("/authorized", IsAuthorized)
 
+	addr := viper.GetString("listen")
 	server = &http.Server{
-		Addr:    address,
+		Addr:    addr,
 		Handler: r,
 	}
 
@@ -78,13 +103,15 @@ func Start(address string, db *db.State) error {
 		}
 	}()
 
-	log.Debugf("Listening on http://%s", address)
+	log.Debugf("Listening on http://%s", addr)
 	return nil
 }
 
 //Stop the server
 func Stop() error {
 	db.Disconnect()
+	acl.Close()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	return server.Shutdown(ctx)

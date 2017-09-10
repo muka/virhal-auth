@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gopkg.in/mgo.v2"
 )
 
@@ -20,24 +21,23 @@ const (
 	TokenCollection = "tokens"
 )
 
-var state *State
-
-//State store db state and config
-type State struct {
-	session  *mgo.Session
-	Addrs    []string
-	Database string
-}
+var session *mgo.Session
 
 //Connect to database
-func Connect(cstate *State) error {
+func Connect() error {
 
-	state = cstate
+	if session != nil {
+		if err := session.Ping(); err == nil {
+			return nil
+		}
+		session.Close()
+		session = nil
+	}
 
 	var err error
-	state.session, err = mgo.DialWithInfo(&mgo.DialInfo{
-		Addrs:    state.Addrs,
-		Database: state.Database,
+	session, err = mgo.DialWithInfo(&mgo.DialInfo{
+		Addrs:    viper.GetStringSlice("mongodb"),
+		Database: viper.GetString("database"),
 	})
 
 	if err != nil {
@@ -45,7 +45,7 @@ func Connect(cstate *State) error {
 	}
 
 	// Optional. Switch the session to a monotonic behavior.
-	state.session.SetMode(mgo.Monotonic, true)
+	session.SetMode(mgo.Monotonic, true)
 
 	err = setupIndexes()
 	if err != nil {
@@ -75,17 +75,21 @@ func setupIndexes() error {
 
 //Disconnect from database
 func Disconnect() {
-	state.session.Close()
+	session.Close()
 }
 
 //Collection load a collection
 func Collection(coll string) *mgo.Collection {
-	if state.session == nil {
-		panic(fmt.Errorf("Cannot get session from %+v", state.Addrs))
+
+	addrs := viper.GetStringSlice("mongodb")
+	db := viper.GetString("database")
+
+	if session == nil {
+		panic(fmt.Errorf("Cannot get session from %+v", addrs))
 	}
-	d := state.session.DB(state.Database)
+	d := session.DB(db)
 	if d == nil {
-		panic(fmt.Errorf("Cannot get Database %s", state.Database))
+		panic(fmt.Errorf("Cannot get Database %s", db))
 	}
 	c := d.C(coll)
 	if c == nil {

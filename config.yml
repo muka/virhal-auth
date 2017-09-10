@@ -1,0 +1,7 @@
+mongodb:
+    - 127.0.0.1
+database: auth_api
+acl_model: acl_model.conf
+log_level: debug
+jwt_token: secret
+listen: :8000
