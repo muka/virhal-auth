@@ -63,7 +63,7 @@ type User struct {
 	ID       string        `json:"id"`
 	Enabled  bool          `json:"enabled"`
 	Username string        `json:"username" binding:"required,min=3,max=64"`
-	Password string        `json:"-"`
+	Password string        `json:"password,omitempty" binding:"required,min=3"`
 	Email    string        `json:"email" binding:"required,min=4,email"`
 
 	UserID         string         `json:"userId" binding:"required,uuid4"`

@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	viper.Set("listen", ":8009")
+	viper.Set("listen", testPort)
 	viper.Set("database", "auth_test")
 
 	go func() {
@@ -48,9 +48,10 @@ func TestMain(m *testing.M) {
 
 func TestUserRegister(t *testing.T) {
 
-	u := model.NewUser()
-	u.Username = "test" + strconv.Itoa(int(time.Now().UnixNano()))
-	u.Password = "secret"
+	u := model.RequestRegister{
+		Username: "test" + strconv.Itoa(int(time.Now().UnixNano())),
+		Password: "secret",
+	}
 	u.Email = u.Username + "@test.local"
 
 	uri := fmt.Sprintf("http://localhost%s/%s", testPort, "register")

@@ -51,6 +51,8 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
+	user.Password = ""
+
 	c.JSON(http.StatusAccepted, user)
 }
 
