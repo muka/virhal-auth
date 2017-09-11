@@ -2,11 +2,11 @@ package model
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/viper"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -24,9 +24,9 @@ type Token struct {
 //GenerateJWTToken generate a JWT token
 func (t *Token) GenerateJWTToken() error {
 
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic(errors.New("JWT_SECRET not set"))
+	secret := []byte(viper.GetString("jwt_token"))
+	if len(secret) == 0 {
+		return errors.New("jwt_token must be set")
 	}
 
 	// Create a new token object, specifying signing method and the claims
@@ -53,8 +53,9 @@ func (t *Token) GenerateJWTToken() error {
 //NewToken create a new token
 func NewToken(user *User) Token {
 	return Token{
-		Expires: time.Now().Add(defaultExpires),
-		Created: time.Now(),
-		UserID:  user.UserID,
+		Created:  time.Now(),
+		Expires:  time.Now().Add(defaultExpires),
+		ObjectID: bson.NewObjectId(),
+		UserID:   user.ID,
 	}
 }

@@ -12,23 +12,29 @@ func TokenColl() *mgo.Collection {
 	return Collection(TokenCollection)
 }
 
-//TokenCreate create a token
-func TokenCreate(user *model.User) (model.Token, *errors.APIError) {
-
-	t := model.NewToken(user)
-
-	err := t.GenerateJWTToken()
-	if err != nil {
-		return t, errors.InternalServerError()
+//TokenCreate create JWT tokens
+func TokenCreate(user *model.User, count int) ([]model.Token, *errors.APIError) {
+	// required for []interface{} conversion
+	itokens := make([]interface{}, count)
+	tokens := make([]model.Token, count)
+	for count > 0 {
+		t := model.NewToken(user)
+		err := t.GenerateJWTToken()
+		if err != nil {
+			return tokens, errors.InternalServerError()
+		}
+		count--
+		tokens[count] = t
+		itokens[count] = t
 	}
 
-	err = TokenColl().Insert(t)
+	err := TokenColl().Insert(itokens...)
 	if err != nil {
 		log.Errorf("Failed to store token: %s", err.Error())
-		return t, errors.InternalServerError()
+		return tokens, errors.InternalServerError()
 	}
 
-	return t, nil
+	return tokens, nil
 }
 
 //TokenUpdate update an user

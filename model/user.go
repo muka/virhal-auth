@@ -66,22 +66,39 @@ type User struct {
 	Password string        `json:"password,omitempty" binding:"required,min=3"`
 	Email    string        `json:"email" binding:"required,min=4,email"`
 
-	UserID         string         `json:"userId" binding:"required,uuid4"`
-	UserType       string         `json:"userType" binding:"required"`
+	UserID         string         `json:"userId,omitempty" binding:"required,uuid4"`
+	UserType       string         `json:"userType,omitempty" binding:"required"`
 	Roles          []Role         `json:"roles" binding:"required"`
-	FirstName      string         `json:"firstName"`
-	LastName       string         `json:"lastName"`
-	DateOfBirth    string         `json:"dateOfBirth"`
+	FirstName      string         `json:"firstName,omitempty"`
+	LastName       string         `json:"lastName,omitempty"`
+	DateOfBirth    string         `json:"dateOfBirth,omitempty"`
 	Service        ServiceEnabled `json:"service"`
-	Lang           Lang           `json:"lang"`
-	SessionToken   string         `json:"sessionToken"`
-	ContactPhone   string         `json:"contactPhone"`
-	NextOfKinName  string         `json:"nextOfKinName"`
-	GeneralRemarks string         `json:"generalRemarks"`
-	MedicalRemarks string         `json:"medicalRemarks"`
-	ServiceID      int            `json:"pilotId"`
+	Lang           Lang           `json:"lang,omitempty"`
+	SessionToken   string         `json:"sessionToken,omitempty"`
+	ContactPhone   string         `json:"contactPhone,omitempty"`
+	NextOfKinName  string         `json:"nextOfKinName,omitempty"`
+	GeneralRemarks string         `json:"generalRemarks,omitempty"`
+	MedicalRemarks string         `json:"medicalRemarks,omitempty"`
+	ServiceID      int            `json:"pilotId,omitempty"`
 	AssignedUsers  []User         `json:"assigned_users"`
 	AssignedDoctor []User         `json:"assigned_doctor"`
+}
+
+//ToPublicUser return a specialized struct for serialization
+func (u *User) ToPublicUser() PublicUser {
+	p := PublicUser{
+		User: u,
+	}
+	return p
+}
+
+type omit *struct{}
+
+//PublicUser expose defined fields on JSON marshalling
+type PublicUser struct {
+	*User
+	ObjectID omit `json:"-"`
+	Password omit `json:"password,omitempty"`
 }
 
 //NewUser init an user

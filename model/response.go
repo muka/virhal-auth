@@ -3,13 +3,13 @@ package model
 //ResponseLogin a response login
 type ResponseLogin struct {
 	StatusCode         string             `json:"statusCode"`
-	UserInfo           User               `json:"userInfo"`
+	UserInfo           PublicUser         `json:"userInfo"`
 	GeneralPreferences GeneralPreferences `json:"generalPreferences"`
 	Sso                Sso                `json:"sso"`
 }
 
 //NewResponseLogin init a ResponseLogin
-func NewResponseLogin(user *User) ResponseLogin {
+func NewResponseLogin(user *User, sso Sso) ResponseLogin {
 
 	statusCode := "ok"
 	if user == nil {
@@ -21,8 +21,8 @@ func NewResponseLogin(user *User) ResponseLogin {
 			Environment: "shared",
 			FontSize:    "200",
 		},
-		Sso:        Sso{},
+		Sso:        sso,
 		StatusCode: statusCode,
-		UserInfo:   *user,
+		UserInfo:   user.ToPublicUser(),
 	}
 }

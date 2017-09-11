@@ -44,6 +44,6 @@ func getHeaderToken(c *gin.Context, key string) (string, error) {
 }
 
 //IsAuthorized check for authorization
-func IsAuthorized(c *gin.Context) {
-
+func IsAuthorized() (bool, *errors.APIError) {
+	return false, nil
 }

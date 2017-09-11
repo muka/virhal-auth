@@ -71,7 +71,6 @@ func UserFind(query interface{}) []model.User {
 func UserLogin(username, password string) (model.User, *errors.APIError) {
 
 	user := model.User{}
-
 	if username == "" || password == "" {
 		return user, errors.LoginFailed("Username and password are required")
 	}
@@ -92,12 +91,6 @@ func UserLogin(username, password string) (model.User, *errors.APIError) {
 		}
 		return user, errors.InternalServerError()
 	}
-
-	token, terr := TokenCreate(&user)
-	if terr != nil {
-		return user, terr
-	}
-	user.SessionToken = token.Value
 
 	return user, nil
 }

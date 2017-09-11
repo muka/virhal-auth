@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
 	"gitlab.fbk.eu/essence/essence-auth/db"
 	"gitlab.fbk.eu/essence/essence-auth/errors"
 	"gitlab.fbk.eu/essence/essence-auth/model"
@@ -23,56 +22,52 @@ func decodeUser(r *http.Request) (model.User, error) {
 }
 
 //UserRegister register a new user
-func UserRegister(c *gin.Context) {
-
-	u := model.RequestRegister{}
-	err := c.BindJSON(&u)
-	if err != nil {
-		verr := errors.Validation(err)
-		c.JSON(verr.Code, verr)
-		return
-	}
+func UserRegister(u model.RequestRegister) (model.User, *errors.APIError) {
 
 	user := u.ToUser()
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Errorf("Failed to hash password: %s", err.Error())
 		err1 := errors.InternalServerError()
-		c.JSON(err1.Code, err1)
-		return
+		return user, err1
 	}
 
 	user.Password = string(hashedPassword)
 
 	e := db.UserCreate(user)
 	if e != nil {
-		c.JSON(e.Code, e)
-		return
+		return user, e
 	}
 
-	user.Password = ""
-
-	c.JSON(http.StatusAccepted, user)
+	return user, nil
 }
 
 //UserLogin login a user
-func UserLogin(c *gin.Context) {
+func UserLogin(r model.RequestLogin) (model.User, model.Sso, *errors.APIError) {
 
-	r := model.RequestLogin{}
-	err := c.BindJSON(&r)
+	user, err := db.UserLogin(r.Username, r.Password)
+	sso := model.Sso{}
+
 	if err != nil {
-		verr := errors.Validation(err)
-		c.JSON(verr.Code, verr)
-		return
+		return user, sso, err
 	}
 
-	u, e := db.UserLogin(r.Username, r.Password)
-	if e != nil {
-		c.JSON(e.Code, e)
-		return
+	log.Debug("Create login token")
+	tokens, terr := db.TokenCreate(&user, 9)
+	if terr != nil {
+		log.Debug("Failed to create JWT tokens")
+		return user, sso, terr
 	}
+	user.SessionToken = tokens[0].Value
+	//sso specific
+	sso.Atlante = tokens[1].Value
+	sso.Biophr = tokens[2].Value
+	sso.Chino = tokens[3].Value
+	sso.Cube3D = tokens[4].Value
+	sso.FitForAll = tokens[5].Value
+	sso.Raptor = tokens[6].Value
+	sso.Trilogis = tokens[7].Value
+	sso.Webrtc = tokens[8].Value
 
-	res := model.NewResponseLogin(&u)
-	c.JSON(http.StatusAccepted, res)
+	return user, sso, nil
 }

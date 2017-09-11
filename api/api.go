@@ -6,7 +6,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"gitlab.fbk.eu/essence/essence-auth/acl"
 	"gitlab.fbk.eu/essence/essence-auth/db"
@@ -22,7 +21,7 @@ func LoadConfiguration() error {
 	viper.SetDefault("log_level", "info")
 	viper.SetDefault("mongodb", []string{"127.0.0.1"})
 	viper.SetDefault("database", "auth_api")
-	viper.SetDefault("listen", ":8080")
+	viper.SetDefault("listen", ":8000")
 	viper.SetDefault("acl_model", "./acl_model.conf")
 
 	viper.SetConfigName("config")
@@ -85,14 +84,7 @@ func Start() error {
 		return err
 	}
 
-	log.Debug("Init router")
-	r := gin.Default()
-
-	r.POST("/register", UserRegister)
-	r.POST("/login", UserLogin)
-
-	auth := r.Group("/", AuthHandler)
-	auth.POST("/authorized", IsAuthorized)
+	r := registerRoutes()
 
 	addr := viper.GetString("listen")
 	server = &http.Server{
