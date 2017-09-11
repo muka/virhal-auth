@@ -43,6 +43,27 @@ func getIndexes() []IndexDefinition {
 					Background: true,
 					Sparse:     true,
 				},
+				mgo.Index{
+					Key:        []string{"userid"},
+					Unique:     false,
+					DropDups:   false,
+					Background: true,
+					Sparse:     true,
+				},
+				mgo.Index{
+					Key:        []string{"expires"},
+					Unique:     false,
+					DropDups:   false,
+					Background: true,
+					Sparse:     true,
+				},
+				mgo.Index{
+					Key:        []string{"expires", "userid"},
+					Unique:     false,
+					DropDups:   false,
+					Background: true,
+					Sparse:     true,
+				},
 			},
 		},
 	}
