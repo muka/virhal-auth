@@ -1,6 +1,6 @@
-# Essence Auth
+# virhal-auth
+Auth~z APIs
 
-Replacement for UNCAP authentication and authorization service
 
 ## Configurations
 
