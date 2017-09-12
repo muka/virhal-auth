@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"gitlab.fbk.eu/essence/essence-auth/db"
-	"gitlab.fbk.eu/essence/essence-auth/errors"
-	"gitlab.fbk.eu/essence/essence-auth/model"
+	"github.com/muka/virhal-auth/db"
+	"github.com/muka/virhal-auth/errors"
+	"github.com/muka/virhal-auth/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -43,31 +43,21 @@ func UserRegister(u model.RequestRegister) (model.User, *errors.APIError) {
 }
 
 //UserLogin login a user
-func UserLogin(r model.RequestLogin) (model.User, model.Sso, *errors.APIError) {
+func UserLogin(r model.RequestLogin) (model.User, *errors.APIError) {
 
 	user, err := db.UserLogin(r.Username, r.Password)
-	sso := model.Sso{}
 
 	if err != nil {
-		return user, sso, err
+		return user, err
 	}
 
 	log.Debug("Create login token")
-	tokens, terr := db.TokenCreate(&user, 9)
+	tokens, terr := db.TokenCreate(&user, 1)
 	if terr != nil {
 		log.Debug("Failed to create JWT tokens")
-		return user, sso, terr
+		return user, terr
 	}
 	user.SessionToken = tokens[0].Value
-	//sso specific
-	sso.Atlante = tokens[1].Value
-	sso.Biophr = tokens[2].Value
-	sso.Chino = tokens[3].Value
-	sso.Cube3D = tokens[4].Value
-	sso.FitForAll = tokens[5].Value
-	sso.Raptor = tokens[6].Value
-	sso.Trilogis = tokens[7].Value
-	sso.Webrtc = tokens[8].Value
 
-	return user, sso, nil
+	return user, nil
 }

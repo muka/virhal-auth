@@ -2,8 +2,8 @@ package db
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"gitlab.fbk.eu/essence/essence-auth/errors"
-	"gitlab.fbk.eu/essence/essence-auth/model"
+	"github.com/muka/virhal-auth/errors"
+	"github.com/muka/virhal-auth/model"
 	"gopkg.in/mgo.v2"
 )
 

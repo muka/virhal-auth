@@ -11,8 +11,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/go-resty/resty"
 	"github.com/spf13/viper"
-	"gitlab.fbk.eu/essence/essence-auth/api"
-	"gitlab.fbk.eu/essence/essence-auth/model"
+	"github.com/muka/virhal-auth/api"
+	"github.com/muka/virhal-auth/model"
 )
 
 const testPort = ":8009"

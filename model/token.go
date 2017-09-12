@@ -14,11 +14,11 @@ const defaultExpires = time.Minute * 30
 
 //Token for authentication
 type Token struct {
-	ObjectID bson.ObjectId `json:"_id,omitempty"`
-	UserID   string        `json:"UserID"`
+	ObjectID bson.ObjectId `json:"-" bson:"_id"`
+	UserID   string        `json:"userId"`
+	Value    string        `json:"token"`
 	Expires  time.Time     `json:"expires"`
 	Created  time.Time
-	Value    string `json:"token"`
 }
 
 //GenerateJWTToken generate a JWT token

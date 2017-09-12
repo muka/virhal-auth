@@ -7,8 +7,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.fbk.eu/essence/essence-auth/acl"
-	"gitlab.fbk.eu/essence/essence-auth/db"
+	"github.com/muka/virhal-auth/acl"
+	"github.com/muka/virhal-auth/db"
 )
 
 var server *http.Server

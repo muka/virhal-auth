@@ -13,6 +13,13 @@ type RequestRegister struct {
 	Email    string `json:"email" binding:"required,min=4,email"`
 }
 
+// RequestAuthorization contains authz request
+type RequestAuthorization struct {
+	SubjectID   string       `json:"subject" binding:"required"`
+	ObjectID    string       `json:"object" binding:"required"`
+	Permissions []Permission `json:"permissions" binding:"required"`
+}
+
 // ToUser convert to a User model
 func (r *RequestRegister) ToUser() User {
 	u := NewUser()

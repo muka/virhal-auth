@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"gitlab.fbk.eu/essence/essence-auth/errors"
-	"gitlab.fbk.eu/essence/essence-auth/model"
+	"github.com/muka/virhal-auth/errors"
+	"github.com/muka/virhal-auth/model"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

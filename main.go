@@ -5,7 +5,7 @@ import (
 	"os/signal"
 
 	log "github.com/Sirupsen/logrus"
-	"gitlab.fbk.eu/essence/essence-auth/api"
+	"github.com/muka/virhal-auth/api"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"gitlab.fbk.eu/essence/essence-auth/errors"
-	"gitlab.fbk.eu/essence/essence-auth/model"
+	"github.com/muka/virhal-auth/errors"
+	"github.com/muka/virhal-auth/model"
 )
 
 func registerRoutes() *gin.Engine {
@@ -43,13 +43,13 @@ func registerRoutes() *gin.Engine {
 			return
 		}
 
-		u, sso, e := UserLogin(r)
+		u, e := UserLogin(r)
 		if e != nil {
 			c.JSON(e.Code, e)
 			return
 		}
 
-		res := model.NewResponseLogin(&u, sso)
+		res := model.NewResponseLogin(&u)
 		c.JSON(http.StatusAccepted, res)
 
 	})

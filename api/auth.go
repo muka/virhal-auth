@@ -5,7 +5,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"gitlab.fbk.eu/essence/essence-auth/errors"
+	"github.com/muka/virhal-auth/errors"
 	"strings"
 )
 
